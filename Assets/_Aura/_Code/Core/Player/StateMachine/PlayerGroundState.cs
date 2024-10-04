@@ -27,6 +27,12 @@ public class PlayerGroundState : PlayerBaseState
             playerStateMachine.ChangeState(player.JumpState);
         }
 
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            playerStateMachine.ChangeState(player.AttackState);
+        }
+
+
        
 
     }

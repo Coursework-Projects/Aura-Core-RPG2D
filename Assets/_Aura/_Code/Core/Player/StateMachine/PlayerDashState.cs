@@ -27,6 +27,11 @@ public class PlayerDashState : PlayerBaseState
 
         player.SetVelocity(player.DashSpeed * player.FacingDirection, 0f);
 
+        if (player.CheckWallCollision())
+        {
+            playerStateMachine.ChangeState(player.WallSlideState);
+        }
+
         if (timer < 0 && player.CheckGrounded())
         {
             playerStateMachine.ChangeState(player.IdleState);

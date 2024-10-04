@@ -10,9 +10,7 @@ public class PlayerFallState : PlayerBaseState
 
     public override void Enter()
     {
-
-        base.Enter();
-        
+        base.Enter();  
     }
 
     public override void Exit()
@@ -24,9 +22,17 @@ public class PlayerFallState : PlayerBaseState
     public override void Update()
     {
         base.Update();
-        if (player.CheckGrounded())//ToDo:implement ground check
+
+        playerRb.velocity = new Vector2(xInput * player.MoveSpeed, playerRb.velocity.y);
+
+        if (player.CheckGrounded())
         {    
             playerStateMachine.ChangeState(player.IdleState);
+        }
+
+        if (player.CheckWallCollision())
+        {
+            playerStateMachine.ChangeState(player.WallSlideState);
         }
     }
 }

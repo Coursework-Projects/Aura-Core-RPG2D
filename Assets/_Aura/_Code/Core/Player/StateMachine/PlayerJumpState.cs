@@ -25,7 +25,15 @@ public class PlayerJumpState : PlayerBaseState
     {
         base.Update();
 
-        if(playerRb.velocity.y < 0)
+        //allow player to move while in the air
+        player.SetVelocity(xInput * player.MoveSpeed, playerRb.velocity.y);
+
+        if (player.CheckWallCollision() && playerRb.velocity.y < 0)
+        {
+            playerStateMachine.ChangeState(player.WallSlideState);
+        }
+
+        else if (playerRb.velocity.y < 0)
         {
             playerStateMachine.ChangeState(player.FallState);
         }

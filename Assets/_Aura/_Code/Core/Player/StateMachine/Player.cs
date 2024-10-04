@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,11 @@ public class Player : MonoBehaviour
     [field:SerializeField]public float DashDuration { get;private set; }
     [field:SerializeField]public float DashCooldown { get;private set; }
     public float DashDirection { get;private set; }
+    #endregion
+
+    #region Wall Jump Ability Settings
+    
+    [field:SerializeField] public Vector2 wallJumpVelocity { get; private set; }
     #endregion
 
     #region Collision Settings
@@ -42,6 +48,9 @@ public class Player : MonoBehaviour
     public PlayerJumpState JumpState { get; private set; }
     public PlayerFallState FallState { get; private set; }
     public PlayerDashState DashState { get; private set; }
+    public PlayerWallJumpState wallJumpState { get; private set; }
+    public PlayerWallSlideState WallSlideState { get; private set; }
+    public PlayerAttackState AttackState { get; private set; }
     #endregion
 
     #region state flags
@@ -51,11 +60,14 @@ public class Player : MonoBehaviour
     #endregion
 
 
+
+
+    #region Monobehaviour Callbacks
     private void Awake()
     {
         //initializer references
         PlayerAnim = GetComponentInChildren<Animator>();
-        PlayerRb=GetComponent<Rigidbody2D>();
+        PlayerRb = GetComponent<Rigidbody2D>();
 
         //initialize state machine
         PlayerStateMachine = new PlayerStateMachine();
@@ -66,9 +78,10 @@ public class Player : MonoBehaviour
         JumpState = new PlayerJumpState(this, PlayerStateMachine, "jump");
         FallState = new PlayerFallState(this, PlayerStateMachine, "jump");
         DashState = new PlayerDashState(this, PlayerStateMachine, "dash");
+        wallJumpState = new PlayerWallJumpState(this, PlayerStateMachine, "jump");
+        WallSlideState = new PlayerWallSlideState(this, PlayerStateMachine, "wallSlide");
+        AttackState = new PlayerAttackState(this, PlayerStateMachine, "attack");
     }
-
-    #region Monobehaviour Callbacks
     private void Start()
     {
         PlayerStateMachine.Initialize(IdleState);
@@ -76,7 +89,8 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        FlipController(Input.GetAxisRaw("Horizontal"));
+        Debug.Log(PlayerStateMachine.CurrentState.ToString());  
+        //FlipController(Input.GetAxisRaw("Horizontal"));
         PlayerStateMachine.CurrentState.Update();
 
         HandleDashInput();
@@ -105,11 +119,15 @@ public class Player : MonoBehaviour
     }
     #endregion
 
-
+    #region Animation API
+    public void TriggerAnimationEvent()=>AttackState.TriggerAnimationEvent(true);
+   
+    #endregion
     #region Movement API
     public void SetVelocity(float _xValue, float _yValue)
     {
         PlayerRb.velocity = new Vector2(_xValue, _yValue);
+        FlipController(PlayerRb.velocity.x);
        
     }
 
@@ -128,6 +146,7 @@ public class Player : MonoBehaviour
 
     #region Collision API
     public bool CheckGrounded() => Physics2D.Raycast(groundChecker.position, Vector2.down, groundCheckDistance, groundMask);
+    public bool CheckWallCollision() => Physics2D.Raycast(wallChecker.position, Vector2.right * FacingDirection, wallCheckDistance, groundMask);
     #endregion
 
     #region Private Utility
@@ -137,5 +156,7 @@ public class Player : MonoBehaviour
         isFacingRight = !isFacingRight;
         FacingDirection = FacingDirection * -1;
     }
+
+    
     #endregion
 }

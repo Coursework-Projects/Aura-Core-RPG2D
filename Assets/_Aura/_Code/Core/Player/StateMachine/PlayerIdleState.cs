@@ -12,7 +12,11 @@ public class PlayerIdleState : PlayerGroundState
     {
         base.Enter();
 
-       
+        //reset the animation trigger
+        TriggerAnimationEvent(false);
+
+        //zero out all velocity carried forward from other states
+        player.SetVelocity(0f, 0f);
         player.PlayerAnim.SetBool(animBoolName, true);
     }
 
@@ -20,7 +24,7 @@ public class PlayerIdleState : PlayerGroundState
     {
         base.Update();
 
-        if (xInput != 0)
+        if (xInput != 0 && player.CheckGrounded())
             playerStateMachine.ChangeState(player.MoveState);
     }
     public override void Exit()
